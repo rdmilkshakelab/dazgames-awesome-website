@@ -1,0 +1,92 @@
+/* Color Variable Configuration */
+:root {
+    --hot-pink: #ff007f;
+    --neon-pink: #ff66b2;
+    --dark-bg: #0d0d11;
+    --panel-bg: #1a1a24;
+    --text-white: #ffffff;
+}
+
+body {
+    background-color: var(--dark-bg);
+    color: var(--text-white);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 20px;
+}
+
+/* Glowing Neon Header */
+.neon-header {
+    text-align: center;
+    margin-bottom: 30px;
+    border-bottom: 3px solid var(--hot-pink);
+    padding-bottom: 15px;
+}
+
+.neon-header h1 {
+    color: var(--hot-pink);
+    font-size: 3rem;
+    margin: 0;
+    text-shadow: 0 0 10px var(--hot-pink);
+}
+
+/* 3-Column Dashboard Layout */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.panel {
+    background-color: var(--panel-bg);
+    border: 2px solid var(--hot-pink);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.1);
+}
+
+.panel h3 {
+    color: var(--neon-pink);
+    margin-top: 0;
+    border-bottom: 1px solid rgba(255, 102, 178, 0.3);
+    padding-bottom: 10px;
+}
+
+/* Pink Interactive Buttons */
+.sound-btn {
+    background: linear-gradient(135deg, var(--hot-pink), #cc0066);
+    color: white;
+    border: none;
+    padding: 15px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    border-radius: 8px;
+    cursor: pointer;
+    width: 100%;
+    margin-bottom: 10px;
+    transition: transform 0.1s, box-shadow 0.2s;
+}
+
+.sound-btn:hover {
+    box-shadow: 0 0 15px var(--neon-pink);
+    transform: translateY(-2px);
+}
+
+.sound-btn:active {
+    transform: scale(0.98);
+}
+
+/* Embedded Media Containers */
+.video-card {
+    background: #111;
+    border-radius: 6px;
+    padding: 10px;
+    margin-bottom: 15px;
+}
+
+.video-card iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border: none;
+    border-radius: 4px;
+}
