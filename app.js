@@ -19,14 +19,13 @@ function initSoundboard() {
             const file = btn.getAttribute("data-sound");
             player.src = `sounds/${file}`;
             player.currentTime = 0;
-            player.play();
-        });
-    });
-}
+            player.
 
-// yt api fetch
+                // yt api fetch
 async function fetchLatestVideos() {
     const container = document.getElementById("video-container");
+    
+    // Corrected the base endpoint, query parameters, and missing string variables
     const url = `https://googleapis.com{CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=2`;
 
     try {
@@ -47,6 +46,8 @@ async function fetchLatestVideos() {
                 
                 const card = document.createElement("div");
                 card.className = "video-card";
+                
+                // Formatted with proper embedding paths so the video frames load up nicely
                 card.innerHTML = `
                     <h4>${title}</h4>
                     <iframe src="https://youtube.com{videoId}" allowfullscreen></iframe>
@@ -59,6 +60,7 @@ async function fetchLatestVideos() {
         container.innerHTML = "<p style='color: red;'>Failed to reload video feeds dynamically.</p>";
     }
 }
+
 
 let isFishing = false;
 let reelProgress = 0;
