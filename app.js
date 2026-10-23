@@ -1,6 +1,6 @@
 // Configuration Objects (Replace with your actual keys and Channel IDs)
 const CONFIG = {
-    YOUTUBE_API_KEY: 'YOUR_FREE_GOOGLE_API_KEY',
+    YOUTUBE_API_KEY: 'AIzaSyAxN8eQDQfi_9M9ZMzh7oI9efpoqk-h9Nw',
     CHANNEL_ID: 'UCaFnJUS9uyysDbZn5fAIT3A', // Off The Hook Channel ID
 };
 
