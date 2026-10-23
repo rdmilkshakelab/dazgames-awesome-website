@@ -1,7 +1,7 @@
-// Configuration Objects (Replace with your actual keys and Channel IDs)
+
 const CONFIG = {
     YOUTUBE_API_KEY: 'AIzaSyAxN8eQDQfi_9M9ZMzh7oI9efpoqk-h9Nw',
-    CHANNEL_ID: 'UCaFnJUS9uyysDbZn5fAIT3A', // Off The Hook Channel ID
+    CHANNEL_ID: 'UCDBCCMlFD-hArPbWv38FINA',
 };
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchLatestVideos();
 });
 
-// Soundboard Trigger Engine
+// soundboard trigger engine
 function initSoundboard() {
     const buttons = document.querySelectorAll(".sound-btn");
     const player = document.getElementById("global-player");
@@ -24,7 +24,7 @@ function initSoundboard() {
     });
 }
 
-// Automated YouTube Data API Fetch
+// yt api fetch
 async function fetchLatestVideos() {
     const container = document.getElementById("video-container");
     const url = `https://googleapis.com{CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=2`;
@@ -38,7 +38,7 @@ async function fetchLatestVideos() {
             return;
         }
 
-        container.innerHTML = ""; // Clear loader text
+        container.innerHTML = ""; // clear loader text
         
         data.items.forEach(item => {
             if (item.id.kind === "youtube#video") {
@@ -71,7 +71,7 @@ document.getElementById("cast-btn").addEventListener("click", () => {
     const progress = document.getElementById("fish-progress");
 
     if (!isFishing) {
-        // Step 1: Cast the line
+        // step 1: cast the line
         isFishing = true;
         btn.innerText = "WAIT FOR BITE...";
         status.innerText = "Line casted... waiting for the float to bob...";
@@ -81,7 +81,7 @@ document.getElementById("cast-btn").addEventListener("click", () => {
             btn.innerText = "REEL!";
             barContainer.style.display = "block";
             
-            // Fish pulling back logic
+            // fish pulling back logic
             fishInterval = setInterval(() => {
                 if (reelProgress > 0) {
                     reelProgress -= 3; // Fish pulls away
@@ -91,13 +91,13 @@ document.getElementById("cast-btn").addEventListener("click", () => {
         }, 2000 + Math.random() * 2000);
 
     } else if (btn.innerText === "REEL!") {
-        // Step 2: Spam reeling mechanics
+        // fish reeling logic
         reelProgress += 12;
         progress.style.width = reelProgress + "%";
 
         if (reelProgress >= 100) {
             clearInterval(fishInterval);
-            const lootTable = ["Massive Sea Bass", "Teeny Minnow", "Old Boot", "Daz's Missing Hat", "Will's Fishing Bait"];
+            const lootTable = ["Massive Sea Bass", "Teeny Minnow", "Old Boot", "Daz's Missing Hat", "Will's Favorite Hat", "Richard the First"];
             const caught = lootTable[Math.floor(Math.random() * lootTable.length)];
             
             status.innerText = `🏆 SUCCESS! You reeled in a [ ${caught} ]!`;
