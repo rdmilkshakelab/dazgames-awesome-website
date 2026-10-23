@@ -59,3 +59,65 @@ async function fetchLatestVideos() {
         container.innerHTML = "<p style='color: red;'>Failed to reload video feeds dynamically.</p>";
     }
 }
+
+let isFishing = false;
+let reelProgress = 0;
+let fishInterval;
+
+document.getElementById("cast-btn").addEventListener("click", () => {
+    const btn = document.getElementById("cast-btn");
+    const status = document.getElementById("game-status");
+    const barContainer = document.getElementById("fishing-bar-container");
+    const progress = document.getElementById("fish-progress");
+
+    if (!isFishing) {
+        // Step 1: Cast the line
+        isFishing = true;
+        btn.innerText = "WAIT FOR BITE...";
+        status.innerText = "Line casted... waiting for the float to bob...";
+        
+        setTimeout(() => {
+            status.innerText = "🐟 BITE! REEL IT IN NOW! SPAM THE BUTTON!";
+            btn.innerText = "REEL!";
+            barContainer.style.display = "block";
+            
+            // Fish pulling back logic
+            fishInterval = setInterval(() => {
+                if (reelProgress > 0) {
+                    reelProgress -= 3; // Fish pulls away
+                    progress.style.width = reelProgress + "%";
+                }
+            }, 150);
+        }, 2000 + Math.random() * 2000);
+
+    } else if (btn.innerText === "REEL!") {
+        // Step 2: Spam reeling mechanics
+        reelProgress += 12;
+        progress.style.width = reelProgress + "%";
+
+        if (reelProgress >= 100) {
+            clearInterval(fishInterval);
+            const lootTable = ["Massive Sea Bass", "Teeny Minnow", "Old Boot", "Daz's Missing Hat", "Will's Fishing Bait"];
+            const caught = lootTable[Math.floor(Math.random() * lootTable.length)];
+            
+            status.innerText = `🏆 SUCCESS! You reeled in a [ ${caught} ]!`;
+            resetGame();
+        }
+    }
+});
+
+function resetGame() {
+    const btn = document.getElementById("cast-btn");
+    const barContainer = document.getElementById("fishing-bar-container");
+    const progress = document.getElementById("fish-progress");
+    
+    isFishing = false;
+    reelProgress = 0;
+    btn.innerText = "CAST LINE";
+    setTimeout(() => {
+        barContainer.style.display = "none";
+        progress.style.width = "0%";
+    }, 3000);
+}
+
+
