@@ -25,8 +25,8 @@ function initSoundboard() {
 async function fetchLatestVideos() {
     const container = document.getElementById("video-container");
     
-    // Corrected the base endpoint, query parameters, and missing string variables
-    const url = `https://googleapis.com{CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=2`;
+    // Base endpoint path with fixed template variables
+    const url = `https://googleapis.com{CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=5`;
 
     try {
         const response = await fetch(url);
@@ -39,22 +39,35 @@ async function fetchLatestVideos() {
 
         container.innerHTML = ""; // clear loader text
         
+        let videoCount = 0;
+        
         data.items.forEach(item => {
-            if (item.id.kind === "youtube#video") {
+            // Limit dashboard display strictly to the top 2 actual videos
+            if (item.id && item.id.kind === "youtube#video" && videoCount < 2) {
                 const videoId = item.id.videoId;
                 const title = item.snippet.title;
+                const thumbnail = item.snippet.thumbnails.medium.url; // Grabs the video image preview
+                const videoUrl = `https://youtube.com{videoId}`; // Clean redirect URL
                 
                 const card = document.createElement("div");
                 card.className = "video-card";
                 
-                // Formatted with proper embedding paths so the video frames load up nicely
+                // FIXED: Changed iframe to a clean, clickable link with a thumbnail image
                 card.innerHTML = `
-                    <h4>${title}</h4>
-                    <iframe src="https://youtube.com{videoId}" allowfullscreen></iframe>
+                    <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" class="video-link">
+                        <img src="${thumbnail}" alt="${title}" class="video-thumbnail">
+                        <h4>${title}</h4>
+                    </a>
                 `;
                 container.appendChild(card);
+                videoCount++;
             }
         });
+
+        if (videoCount === 0) {
+            container.innerHTML = "<p>No recent video uploads found in this feed loop.</p>";
+        }
+
     } catch (error) {
         console.error("API Fetch Error:", error);
         container.innerHTML = "<p style='color: red;'>Failed to reload video feeds dynamically.</p>";
