@@ -17,7 +17,7 @@ function initSoundboard() {
     buttons.forEach(btn => {
         btn.addEventListener("click", () => {
             const file = btn.getAttribute("data-sound");
-            player.src = `sounds/${file}`;
+            player.src = file;
             player.currentTime = 0;
             player.
 
