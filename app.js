@@ -135,4 +135,95 @@ function resetGame() {
     }, 3000);
 }
 
+// CONFIGURATION: Populated with your exact live rss.app feeds
+const SOCIAL_FEEDS = {
+    twitter: "https://rss.app/feeds/7qbely6L2jyljIuD.xml",
+    instagram: "https://rss.app/feeds/Qi47PvXka44z63Dg.xml"
+};
+
+async function fetchSocialFeeds() {
+    const container = document.getElementById("social-container");
+    
+    // Wrap your live feeds into individual proxy urls to strip CORS blocks completely
+    const twitterProxy = `https://rss2json.com{encodeURIComponent(SOCIAL_FEEDS.twitter)}`;
+    const instagramProxy = `https://rss2json.com{encodeURIComponent(SOCIAL_FEEDS.instagram)}`;
+
+    try {
+        // Fetch both social feeds concurrently
+        const [twitterResponse, instagramResponse] = await Promise.all([
+            fetch(twitterProxy).then(res => res.json().catch(() => ({ items: [] }))),
+            fetch(instagramProxy).then(res => res.json().catch(() => ({ items: [] })))
+        ]);
+
+        let combinedPosts = [];
+
+        // Parse Twitter Payload 
+        if (twitterResponse.items && twitterResponse.items.length > 0) {
+            twitterResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Twitter / X",
+                    text: item.title || "New Tweet",
+                    link: item.link,
+                    date: new Date(item.pubDate).getTime()
+                });
+            });
+        }
+
+        // Parse Instagram Payload
+        if (instagramResponse.items && instagramResponse.items.length > 0) {
+            instagramResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Instagram",
+                    text: item.title || "New Instagram Post",
+                    link: item.link,
+                    date: new Date(item.pubDate).getTime()
+                });
+            });
+        }
+
+        // Sort dynamically so the absolute newest post across BOTH platforms sits at index 0
+        combinedPosts.sort((a, b) => b.date - a.date);
+
+        if (combinedPosts.length === 0) {
+            container.innerHTML = "<p>No recent social updates found.</p>";
+            return;
+        }
+
+        container.innerHTML = ""; // Clear loader text
+        const displayCard = document.createElement("div");
+        displayCard.className = "social-card-display";
+        container.appendChild(displayCard);
+
+        let currentIndex = 0;
+
+        // Display switcher loop function
+        function renderPost() {
+            const post = combinedPosts[currentIndex];
+            const isInstagram = post.platform === "Instagram";
+            
+            displayCard.innerHTML = `
+                <div class="social-badge ${isInstagram ? 'instagram' : 'twitterx'}">
+                    ${isInstagram ? '📸' : '🐦'} ${post.platform}
+                </div>
+                <p class="social-text">${post.text}</p>
+                <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="social-view-btn">
+                    View Original Post →
+                </a>
+            `;
+
+            // Seamlessly alternate to the next index item, looping infinitely
+            currentIndex = (currentIndex + 1) % combinedPosts.length;
+        }
+
+        // Trigger the initial rendering cycle instantly
+        renderPost();
+
+        // Automatically auto-switch profiles every 5 seconds flat
+        setInterval(renderPost, 5000);
+
+    } catch (error) {
+        console.error("Social Engine Error:", error);
+        container.innerHTML = "<p style='color: red;'>Failed to load social updates.</p>";
+    }
+}
 
