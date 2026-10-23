@@ -3,33 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daz Games Community Soundboard</title>
+    <title>Daz & Will: Off The Hook Fan Hub</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-    <header>
-        <h1>Daz Games Soundboard</h1>
-        <p>A fan project by rdmilkshakelab</p>
+    <!-- Top Neon Header -->
+    <header class="neon-header">
+        <div class="logo-container">
+            <h1>DAZ & WILL</h1>
+            <h2>OFF THE HOOK FAN HUB</h2>
+        </div>
+        <p class="credit">Developed as an experiment by rdmilkshakelab</p>
     </header>
 
-    <main class="sound-grid">
-        <!-- Sound Button 1 -->
-        <button class="sound-btn" data-sound="linda.mp3">
-            <span class="emoji">🗣️</span>
-            <span class="label">LINDA!</span>
-        </button>
+    <div class="dashboard-grid">
+        
+        <!-- PANEL 1: The Soundboard Grid -->
+        <section class="panel soundboard-panel">
+            <h3>⚡ MEME SOUNDBOARD</h3>
+            <div class="sound-grid">
+                <button class="sound-btn" data-sound="linda.mp3">🗣️ LINDA!</button>
+                <button class="sound-btn" data-sound="ha.mp3">🎩 ha. (Hat Raise)</button>
+                <button class="sound-btn" data-sound="box.mp3">📦 Pass me the box</button>
+            </div>
+        </section>
 
-        <!-- Sound Button 2 -->
-        <button class="sound-btn" data-sound="ha.mp3">
-            <span class="emoji">🎩</span>
-            <span class="label">ha.</span>
-        </button>
-    </main>
+        <!-- PANEL 2: Live YouTube API Video Feed -->
+        <section class="panel youtube-panel">
+            <h3>📺 LATEST VIDEOS</h3>
+            <div id="video-container" class="video-feed">
+                <p class="loading">Fetching latest uploads from YouTube...</p>
+            </div>
+        </section>
 
-    <!-- Single Audio Element for JS to control -->
-    <audio id="audio-player"></audio>
+        <!-- PANEL 3: Live Social Updates Feed -->
+        <section class="panel social-panel">
+            <h3>📱 SOCIAL UPDATES</h3>
+            <div id="social-container" class="social-feed">
+                <p class="loading">Connecting to social feeds...</p>
+            </div>
+        </section>
 
-    <script src="script.js"></script>
+    </div>
+
+    <!-- Hidden audio element for soundboard logic -->
+    <audio id="global-player"></audio>
+
+    <script src="app.js"></script>
 </body>
 </html>
