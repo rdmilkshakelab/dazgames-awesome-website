@@ -175,6 +175,90 @@ body {
     line-height: 1.6;
 }
 
+.about-panel {
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.about-header h3 {
+    margin: 0 0 16px;
+    font-size: clamp(1.5rem, 2.5vw, 2.4rem);
+    color: var(--white);
+}
+
+.about-layout {
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.about-copy p {
+    margin: 0 0 14px;
+    color: var(--muted);
+    line-height: 1.8;
+    font-size: 1rem;
+}
+
+.about-facts {
+    display: grid;
+    gap: 14px;
+}
+
+.fact-box {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 16px 14px;
+}
+
+.fact-box span {
+    display: block;
+    font-size: 0.72rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+}
+
+.fact-box strong {
+    color: var(--white);
+    font-size: 1rem;
+    line-height: 1.5;
+}
+
+.easter-egg-panel {
+    padding: 28px;
+    margin-bottom: 24px;
+}
+
+.egg-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+.egg-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    padding: 18px 16px;
+    text-align: center;
+}
+
+.egg-card span {
+    font-size: 2rem;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.egg-card p {
+    margin: 0;
+    color: var(--muted);
+    line-height: 1.7;
+    font-size: 0.95rem;
+}
+
 .dashboard-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -398,11 +482,13 @@ body {
         padding: 16px;
     }
 
-    .hero-panel {
+    .hero-panel,
+    .about-layout {
         grid-template-columns: 1fr;
     }
 
-    .feature-row {
+    .feature-row,
+    .egg-grid {
         grid-template-columns: 1fr;
     }
 

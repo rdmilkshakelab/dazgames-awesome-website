@@ -71,6 +71,71 @@
             </article>
         </section>
 
+        <section class="about-panel panel">
+            <div class="about-header">
+                <p class="kicker">ABOUT DAZ</p>
+                <h3>Born to entertain, built for the internet.</h3>
+            </div>
+
+            <div class="about-layout">
+                <div class="about-copy">
+                    <p>
+                        Darren “Daz” Black is one of the most recognisable British internet personalities of the last decade.
+                        He’s a YouTuber, comedian, actor, filmmaker, and content creator with a huge fanbase that loves his
+                        honest reactions, no-filter humour, and unmistakable energy.
+                    </p>
+                    <p>
+                        The magic of Daz Games is his ability to make gaming feel personal. He is expressive, affectionate,
+                        chaotic, and impossible to classify as anything other than himself. Whether he is reacting to a horror
+                        game, poking fun at a viral moment, or just being wildly charismatic in front of the camera, he brings
+                        a vibe that feels both familiar and larger than life.
+                    </p>
+                    <p>
+                        He also has that rare quality of making viewers feel like they are in on the joke — like they’re laughing
+                        with a mate who just happens to be one of the funniest people on the internet.
+                    </p>
+                </div>
+
+                <div class="about-facts">
+                    <div class="fact-box">
+                        <span>Known for</span>
+                        <strong>Gaming, reactions, humour</strong>
+                    </div>
+                    <div class="fact-box">
+                        <span>Signature style</span>
+                        <strong>Chaotic, warm, expressive</strong>
+                    </div>
+                    <div class="fact-box">
+                        <span>Fan favourite</span>
+                        <strong>Horror games + comedy chaos</strong>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="easter-egg-panel panel">
+            <p class="kicker">EASTER EGGS</p>
+            <h3>Little Daz moments and fan lore</h3>
+            <div class="egg-grid">
+                <div class="egg-card">
+                    <span>🎩</span>
+                    <p>“ha.” is basically instant Daz energy — a tiny, iconic, unforgettable little moment.</p>
+                </div>
+                <div class="egg-card">
+                    <span>🕶️</span>
+                    <p>His comedy style feels like a studio audience and a sleepover vlog had a baby.</p>
+                </div>
+                <div class="egg-card">
+                    <span>🎮</span>
+                    <p>Any time a horror game starts creeping in, everyone knows the tension is about to go absolutely feral.</p>
+                </div>
+                <div class="egg-card">
+                    <span>😂</span>
+                    <p>The core of Daz’s charm is that he doesn’t just react — he fully commits to the moment.</p>
+                </div>
+            </div>
+        </section>
+
         <div class="dashboard-grid">
             <section class="panel soundboard-panel">
                 <h3>⚡ MEME SOUNDBOARD</h3>
