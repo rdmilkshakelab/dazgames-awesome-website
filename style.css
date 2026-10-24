@@ -1,176 +1,178 @@
-/* Color Variable Configuration */
-:root {
-    --hot-pink: #ff007f;
-    --neon-pink: #ff66b2;
-    --dark-bg: #0d0d11;
-    --panel-bg: #1a1a24;
-    --text-white: #ffffff;
+const CONFIG = {
+    YOUTUBE_API_KEY: 'AIzaSyAxN8eQDQfi_9M9ZMzh7oI9efpoqk-h9Nw',
+    CHANNEL_ID: 'UCDBCCMlFD-hArPbWv38FINA',
+    RSS_FEEDS: {
+        twitter: 'https://rss.app/feeds/7qbely6L2jyljIuD.xml',
+        instagram: 'https://rss.app/feeds/Qi47PvXka44z63Dg.xml'
+    }
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+    initSoundboard();
+    fetchLatestVideos();
+    fetchSocialFeeds();
+});
+
+function initSoundboard() {
+    const buttons = document.querySelectorAll(".sound-btn");
+    const player = document.getElementById("global-player");
+
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const file = btn.getAttribute("data-sound");
+            if (!file) return;
+
+            player.src = `sounds/${file}`;
+            player.load();
+            player.currentTime = 0;
+            player.play().catch(error => {
+                console.warn("Audio playback was blocked:", error);
+            });
+        });
+    });
 }
 
-body {
-    background-color: var(--dark-bg);
-    color: var(--text-white);
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 20px;
+async function fetchLatestVideos() {
+    const container = document.getElementById("video-container");
+
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=5&type=video`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`YouTube API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.items || data.items.length === 0) {
+            container.innerHTML = "<p>No recent videos found.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+
+        let videoCount = 0;
+
+        data.items.forEach(item => {
+            if (item.id && item.id.videoId && videoCount < 3) {
+                const videoId = item.id.videoId;
+                const title = item.snippet?.title || "Untitled video";
+                const thumbnail = item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || "";
+                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+                const card = document.createElement("div");
+                card.className = "video-card";
+
+                card.innerHTML = `
+                    <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" class="video-link">
+                        <img src="${thumbnail}" alt="${title}" class="video-thumbnail">
+                        <div class="video-meta">
+                            <h4>${title}</h4>
+                            <span>Watch on YouTube →</span>
+                        </div>
+                    </a>
+                `;
+
+                container.appendChild(card);
+                videoCount++;
+            }
+        });
+
+        if (videoCount === 0) {
+            container.innerHTML = "<p>No recent video uploads found in this feed loop.</p>";
+        }
+    } catch (error) {
+        console.error("API Fetch Error:", error);
+        container.innerHTML = "<p style='color: red;'>Failed to reload video feeds dynamically.</p>";
+    }
 }
 
-/* Glowing Neon Header */
-.neon-header {
-    text-align: center;
-    margin-bottom: 30px;
-    border-bottom: 3px solid var(--hot-pink);
-    padding-bottom: 15px;
+async function fetchRssFeed(url) {
+    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+
+    try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            return { items: [] };
+        }
+
+        const data = await response.json();
+        return data && Array.isArray(data.items) ? data : { items: [] };
+    } catch (error) {
+        console.error(`RSS fetch failed for ${url}:`, error);
+        return { items: [] };
+    }
 }
 
-.neon-header h1 {
-    color: var(--hot-pink);
-    font-size: 3rem;
-    margin: 0;
-    text-shadow: 0 0 10px var(--hot-pink);
-}
+async function fetchSocialFeeds() {
+    const container = document.getElementById("social-container");
 
-/* 3-Column Dashboard Layout */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-    gap: 20px;
-}
+    try {
+        const [twitterResponse, instagramResponse] = await Promise.all([
+            fetchRssFeed(CONFIG.RSS_FEEDS.twitter),
+            fetchRssFeed(CONFIG.RSS_FEEDS.instagram)
+        ]);
 
-.panel {
-    background-color: var(--panel-bg);
-    border: 2px solid var(--hot-pink);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 4px 15px rgba(255, 0, 127, 0.1);
-}
+        let combinedPosts = [];
 
-.panel h3 {
-    color: var(--neon-pink);
-    margin-top: 0;
-    border-bottom: 1px solid rgba(255, 102, 178, 0.3);
-    padding-bottom: 10px;
-}
+        if (twitterResponse.items && twitterResponse.items.length > 0) {
+            twitterResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Twitter / X",
+                    text: item.title || "New Tweet",
+                    link: item.link || "#",
+                    date: new Date(item.pubDate || Date.now()).getTime()
+                });
+            });
+        }
 
-/* Pink Interactive Buttons */
-.sound-btn {
-    background: linear-gradient(135deg, var(--hot-pink), #cc0066);
-    color: white;
-    border: none;
-    padding: 15px;
-    font-size: 1.1rem;
-    font-weight: bold;
-    border-radius: 8px;
-    cursor: pointer;
-    width: 100%;
-    margin-bottom: 10px;
-    transition: transform 0.1s, box-shadow 0.2s;
-}
+        if (instagramResponse.items && instagramResponse.items.length > 0) {
+            instagramResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Instagram",
+                    text: item.title || "New Instagram Post",
+                    link: item.link || "#",
+                    date: new Date(item.pubDate || Date.now()).getTime()
+                });
+            });
+        }
 
-.sound-btn:hover {
-    box-shadow: 0 0 15px var(--neon-pink);
-    transform: translateY(-2px);
-}
+        combinedPosts.sort((a, b) => b.date - a.date);
 
-.sound-btn:active {
-    transform: scale(0.98);
-}
+        if (combinedPosts.length === 0) {
+            container.innerHTML = "<p>No recent social updates found.</p>";
+            return;
+        }
 
-/* Embedded Media Containers */
-.video-card {
-    background: #111;
-    border-radius: 6px;
-    padding: 10px;
-    margin-bottom: 15px;
-}
+        container.innerHTML = "";
+        const displayCard = document.createElement("div");
+        displayCard.className = "social-card-display";
+        container.appendChild(displayCard);
 
-.video-card iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border: none;
-    border-radius: 4px;
-}
+        let currentIndex = 0;
 
-#game-box {
-    text-align: center;
-    padding: 15px;
-    background: #111;
-    border-radius: 8px;
-    border: 1px dashed var(--hot-pink);
-}
+        function renderPost() {
+            const post = combinedPosts[currentIndex];
+            const isInstagram = post.platform === "Instagram";
 
-#fishing-bar-container {
-    width: 100%;
-    background-color: #222;
-    border-radius: 10px;
-    margin: 15px 0;
-    border: 1px solid var(--hot-pink);
-    overflow: hidden;
-}
+            displayCard.innerHTML = `
+                <div class="social-badge ${isInstagram ? 'instagram' : 'twitterx'}">
+                    ${isInstagram ? '📸' : '🐦'} ${post.platform}
+                </div>
+                <p class="social-text">${post.text}</p>
+                <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="social-view-btn">
+                    View Original Post →
+                </a>
+            `;
 
-#fish-progress {
-    width: 0%;
-    height: 20px;
-    background: linear-gradient(90deg, var(--hot-pink), var(--neon-pink));
-    transition: width 0.1s ease;
-}
+            currentIndex = (currentIndex + 1) % combinedPosts.length;
+        }
 
-#maintenance-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background-color: #0d0d11;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 9999;
-}
-
-#maintenance-overlay.hidden {
-    display: none; /* Keeps it hidden during normal use */
-}
-
-.maintenance-content {
-    text-align: center;
-    border: 4px solid #ff007f;
-    padding: 40px;
-    border-radius: 20px;
-    background: #1a1a24;
-    box-shadow: 0 0 30px rgba(255, 0, 127, 0.4);
-}
-
-.maintenance-content h1 {
-    color: #ff007f;
-    font-size: 2.5rem;
-    text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
-    margin-bottom: 5px;
-}
-
-.maintenance-content h2 {
-    color: #ff66b2;
-    font-size: 1.8rem;
-    margin-top: 0;
-}
-
-.loading-mug {
-    font-size: 5rem;
-    animation: steam 1.5s ease-in-out infinite alternate;
-}
-
-@keyframes steam {
-    0% { transform: translateY(0) scale(1); }
-    100% { transform: translateY(-10px) scale(1.05); }
-}
-
-.video-link {
-    text-decoration: none;
-    color: inherit;
-    display: block;
-}
-.video-thumbnail {
-    width: 100%;
-    border-radius: 8px;
-    margin-bottom: 8px;
+        renderPost();
+        setInterval(renderPost, 5000);
+    } catch (error) {
+        console.error("Social Engine Error:", error);
+        container.innerHTML = "<p style='color: red;'>Failed to load social updates.</p>";
+    }
 }
