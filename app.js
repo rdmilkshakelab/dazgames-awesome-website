@@ -136,6 +136,12 @@
             </div>
         </section>
 
+        <section class="panel rewards-panel">
+            <p class="kicker">REWARDS</p>
+            <h3>Unlocked badges</h3>
+            <div id="badge-container" class="badge-container"></div>
+        </section>
+
         <div class="dashboard-grid">
             <section class="panel soundboard-panel">
                 <h3>⚡ MEME SOUNDBOARD</h3>
@@ -174,6 +180,30 @@
                 </div>
             </section>
         </div>
+
+        <section class="panel game-panel">
+            <h3>🎣 FISH IN DAZ’S POND</h3>
+            <div id="game-box">
+                <p id="game-status">Ready to catch some fish?</p>
+                <div id="fishing-bar-container" style="display: none;">
+                    <div id="fish-progress"></div>
+                </div>
+                <button id="cast-btn">CAST LINE</button>
+            </div>
+        </section>
+
+        <section class="panel memory-panel">
+            <h3>🎯 DAZ MEMORY RUSH</h3>
+            <div id="memory-game" class="memory-game">
+                <button class="memory-card" data-key="1">?</button>
+                <button class="memory-card" data-key="2">?</button>
+                <button class="memory-card" data-key="3">?</button>
+                <button class="memory-card" data-key="4">?</button>
+                <button class="memory-card" data-key="5">?</button>
+                <button class="memory-card" data-key="6">?</button>
+            </div>
+            <p id="memory-status" class="memory-status">Match the Daz-themed pairs.</p>
+        </section>
     </main>
 
     <audio id="global-player"></audio>

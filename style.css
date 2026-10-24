@@ -7,10 +7,97 @@ const CONFIG = {
     }
 };
 
+const BADGE_DEFS = [
+    {
+        id: 'dazzler',
+        name: 'Dazzler',
+        icon: '✨',
+        description: 'You showed up and instantly became part of the Daz Games chaos.'
+    },
+    {
+        id: 'better-than-will',
+        name: 'Better than Will',
+        icon: '🏆',
+        description: 'You fished so much better than Will that your shoulder is starting to hurt.'
+    }
+];
+
+const STORAGE_KEY = 'daz-games-badges';
+
+const DEFAULT_PROGRESS = {
+    dazzler: false,
+    'better-than-will': false,
+    massiveSeaBassCaught: 0,
+    lastBadge: null
+};
+
+let progress = loadProgress();
+
+function loadProgress() {
+    try {
+        const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+        return { ...DEFAULT_PROGRESS, ...saved };
+    } catch (error) {
+        return { ...DEFAULT_PROGRESS };
+    }
+}
+
+function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+}
+
+function unlockBadge(id) {
+    if (!progress[id]) {
+        progress[id] = true;
+        progress.lastBadge = id;
+        saveProgress();
+        renderBadges();
+        showBadgeToast(BADGE_DEFS.find(b => b.id === id));
+    }
+}
+
+function renderBadges() {
+    const container = document.getElementById('badge-container');
+    if (!container) return;
+
+    const items = BADGE_DEFS.map((badge) => {
+        const unlocked = Boolean(progress[badge.id]);
+        return `
+            <div class="badge ${unlocked ? 'unlocked' : 'locked'}">
+                <div class="badge-icon">${badge.icon}</div>
+                <div class="badge-copy">
+                    <h4>${badge.name}</h4>
+                    <p>${badge.description}</p>
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = items;
+}
+
+function showBadgeToast(badge) {
+    if (!badge) return;
+
+    const toast = document.createElement('div');
+    toast.className = 'badge-toast';
+    toast.textContent = `Badge unlocked: ${badge.name}`;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.classList.add('visible'), 20);
+    setTimeout(() => {
+        toast.classList.remove('visible');
+        setTimeout(() => toast.remove(), 400);
+    }, 2200);
+}
+
 document.addEventListener("DOMContentLoaded", () => {
+    unlockBadge('dazzler');
+    renderBadges();
     initSoundboard();
     fetchLatestVideos();
     fetchSocialFeeds();
+    initFishingGame();
+    initMemoryGame();
 });
 
 function initSoundboard() {
@@ -25,7 +112,7 @@ function initSoundboard() {
             player.src = `sounds/${file}`;
             player.load();
             player.currentTime = 0;
-            player.play().catch(error => {
+            player.play().catch((error) => {
                 console.warn("Audio playback was blocked:", error);
             });
         });
@@ -54,7 +141,7 @@ async function fetchLatestVideos() {
 
         let videoCount = 0;
 
-        data.items.forEach(item => {
+        data.items.forEach((item) => {
             if (item.id && item.id.videoId && videoCount < 3) {
                 const videoId = item.id.videoId;
                 const title = item.snippet?.title || "Untitled video";
@@ -117,7 +204,7 @@ async function fetchSocialFeeds() {
         let combinedPosts = [];
 
         if (twitterResponse.items && twitterResponse.items.length > 0) {
-            twitterResponse.items.forEach(item => {
+            twitterResponse.items.forEach((item) => {
                 combinedPosts.push({
                     platform: "Twitter / X",
                     text: item.title || "New Tweet",
@@ -128,7 +215,7 @@ async function fetchSocialFeeds() {
         }
 
         if (instagramResponse.items && instagramResponse.items.length > 0) {
-            instagramResponse.items.forEach(item => {
+            instagramResponse.items.forEach((item) => {
                 combinedPosts.push({
                     platform: "Instagram",
                     text: item.title || "New Instagram Post",
@@ -176,3 +263,154 @@ async function fetchSocialFeeds() {
         container.innerHTML = "<p style='color: red;'>Failed to load social updates.</p>";
     }
 }
+
+function initFishingGame() {
+    let isFishing = false;
+    let reelProgress = 0;
+    let fishInterval;
+
+    const btn = document.getElementById("cast-btn");
+    const status = document.getElementById("game-status");
+    const barContainer = document.getElementById("fishing-bar-container");
+    const progressEl = document.getElementById("fish-progress");
+
+    btn.addEventListener("click", () => {
+        if (!isFishing) {
+            isFishing = true;
+            btn.innerText = "WAIT FOR BITE...";
+            status.innerText = "Line casted... waiting for the float to bob...";
+
+            setTimeout(() => {
+                status.innerText = "🐟 BITE! REEL IT IN NOW! SPAM THE BUTTON!";
+                btn.innerText = "REEL!";
+                barContainer.style.display = "block";
+
+                fishInterval = setInterval(() => {
+                    if (reelProgress > 0) {
+                        reelProgress -= 3;
+                        progressEl.style.width = reelProgress + "%";
+                    }
+                }, 150);
+            }, 2000 + Math.random() * 2000);
+
+            return;
+        }
+
+        if (btn.innerText === "REEL!") {
+            reelProgress += 12;
+            progressEl.style.width = reelProgress + "%";
+
+            if (reelProgress >= 100) {
+                clearInterval(fishInterval);
+                const lootTable = [
+                    "Massive Sea Bass",
+                    "Teeny Minnow",
+                    "Old Boot",
+                    "Daz's Missing Hat",
+                    "Will's Favorite Hat",
+                    "Richard the First"
+                ];
+
+                const caught = lootTable[Math.floor(Math.random() * lootTable.length)];
+                status.innerText = `🏆 SUCCESS! You reeled in a [ ${caught} ]!`;
+
+                if (caught === 'Massive Sea Bass') {
+                    progress.massiveSeaBassCaught = (progress.massiveSeaBassCaught || 0) + 1;
+                    saveProgress();
+
+                    if (progress.massiveSeaBassCaught >= 5) {
+                        unlockBadge('better-than-will');
+                    }
+                }
+
+                resetGame();
+            }
+        }
+    });
+
+    function resetGame() {
+        isFishing = false;
+        reelProgress = 0;
+        btn.innerText = "CAST LINE";
+        setTimeout(() => {
+            barContainer.style.display = "none";
+            progressEl.style.width = "0%";
+        }, 3000);
+    }
+}
+
+function initMemoryGame() {
+    const cards = Array.from(document.querySelectorAll('.memory-card'));
+    const status = document.getElementById('memory-status');
+    const pairs = [
+        { key: '1', label: '🎮' },
+        { key: '2', label: '😄' },
+        { key: '3', label: '🎩' },
+        { key: '4', label: '🕶️' },
+        { key: '5', label: '😂' },
+        { key: '6', label: '🔥' }
+    ];
+
+    const values = [...pairs, ...pairs].sort(() => Math.random() - 0.5);
+    cards.forEach((card, index) => {
+        card.textContent = values[index].label;
+        card.dataset.value = values[index].key;
+        card.disabled = false;
+        card.classList.remove('matched');
+    });
+
+    let firstCard = null;
+    let secondCard = null;
+    let lock = false;
+
+    cards.forEach((card) => {
+        card.addEventListener('click', () => {
+            if (lock || card === firstCard || card.classList.contains('matched')) return;
+
+            card.classList.add('flipped');
+            if (!firstCard) {
+                firstCard = card;
+                return;
+            }
+
+            secondCard = card;
+            lock = true;
+
+            if (firstCard.dataset.value === secondCard.dataset.value) {
+                firstCard.classList.add('matched');
+                secondCard.classList.add('matched');
+                firstCard = null;
+                secondCard = null;
+                lock = false;
+                status.textContent = 'Daz energy locked in. Nice.';
+                return;
+            }
+
+            status.textContent = 'Nope — the chaos is real.';
+            setTimeout(() => {
+                firstCard.classList.remove('flipped');
+                secondCard.classList.remove('flipped');
+                firstCard = null;
+                secondCard = null;
+                lock = false;
+                status.textContent = 'Match the Daz-themed pairs.';
+            }, 800);
+        });
+    });
+}
+
+function resetMemoryGame() {
+    initMemoryGame();
+}
+
+setInterval(() => {
+    const memoryCards = document.querySelectorAll('.memory-card');
+    if (memoryCards.length) {
+        const matched = [...memoryCards].filter(card => card.classList.contains('matched')).length;
+        if (matched === memoryCards.length) {
+            setTimeout(() => {
+                resetMemoryGame();
+            }, 700);
+        }
+    }
+}, 500);
