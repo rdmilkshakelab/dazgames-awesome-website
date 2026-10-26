@@ -1,213 +1,232 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Daz Games Fan Hub</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div id="maintenance-overlay" class="hidden">
-        <div class="maintenance-content">
-            <div class="loading-mug">☕</div>
-            <h1>Website will be back soon</h1>
-            <h2>Making some tea...</h2>
-            <p>Linda is making some awesome upgrades!</p>
-        </div>
-    </div>
+const CONFIG = {
+    YOUTUBE_API_KEY: 'AIzaSyAxN8eQDQfi_9M9ZMzh7oI9efpoqk-h9Nw',
+    CHANNEL_ID: 'UCDBCCMlFD-hArPbWv38FINA',
+    RSS_FEEDS: {
+        twitter: 'https://rss.app/feeds/7qbely6L2jyljIuD.xml',
+        instagram: 'https://rss.app/feeds/Qi47PvXka44z63Dg.xml'
+    }
+};
 
-    <header class="neon-header">
-        <div class="logo-container">
-            <p class="eyebrow">Darren “Daz” Black</p>
-            <h1>DAZ GAMES</h1>
-            <h2>fan hub</h2>
-        </div>
-        <p class="credit">Gaming chaos, laughs, reactions, and pure internet energy.</p>
-    </header>
+document.addEventListener("DOMContentLoaded", () => {
+    initSoundboard();
+    fetchLatestVideos();
+    fetchSocialFeeds();
+});
 
-    <main class="page-shell">
-        <section class="hero-panel panel">
-            <div class="hero-copy">
-                <p class="kicker">THE BRITISH INTERNET ICON</p>
-                <h3>Big laughs. Big reactions. Big personality.</h3>
-                <p>
-                    Daz Games is the creation of Darren “Daz” Black — a comedy powerhouse, YouTuber,
-                    gamer, and internet personality known for his chaotic energy, hilarious reactions,
-                    and love of horror games, comedy sketches, and all-round madcap fun.
-                </p>
-            </div>
+// soundboard trigger engine
+function initSoundboard() {
+    const buttons = document.querySelectorAll(".sound-btn");
+    const player = document.getElementById("global-player");
 
-            <div class="hero-stats">
-                <div class="stat-box">
-                    <span class="stat-label">Style</span>
-                    <strong>Chaotic</strong>
+    buttons.forEach(btn => {
+        btn.addEventListener("click", () => {
+            const file = btn.getAttribute("data-sound");
+            if (!file) return;
+
+            player.src = `sounds/${file}`;
+            player.load();
+            player.currentTime = 0;
+            player.play().catch(error => {
+                console.warn("Audio playback was blocked:", error);
+            });
+        });
+    });
+}
+
+async function fetchLatestVideos() {
+    const container = document.getElementById("video-container");
+
+    const url = `https://www.googleapis.com/youtube/v3/search?key=${CONFIG.YOUTUBE_API_KEY}&channelId=${CONFIG.CHANNEL_ID}&part=snippet,id&order=date&maxResults=5&type=video`;
+
+    try {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`YouTube API request failed with status ${response.status}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.items || data.items.length === 0) {
+            container.innerHTML = "<p>No recent videos found.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+
+        let videoCount = 0;
+
+        data.items.forEach(item => {
+            if (item.id && item.id.videoId && videoCount < 2) {
+                const videoId = item.id.videoId;
+                const title = item.snippet?.title || "Untitled video";
+                const thumbnail = item.snippet?.thumbnails?.medium?.url || item.snippet?.thumbnails?.default?.url || "";
+                const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+                const card = document.createElement("div");
+                card.className = "video-card";
+
+                card.innerHTML = `
+                    <a href="${videoUrl}" target="_blank" rel="noopener noreferrer" class="video-link">
+                        <img src="${thumbnail}" alt="${title}" class="video-thumbnail">
+                        <h4>${title}</h4>
+                    </a>
+                `;
+
+                container.appendChild(card);
+                videoCount++;
+            }
+        });
+
+        if (videoCount === 0) {
+            container.innerHTML = "<p>No recent video uploads found in this feed loop.</p>";
+        }
+    } catch (error) {
+        console.error("API Fetch Error:", error);
+        container.innerHTML = "<p style='color: red;'>Failed to reload video feeds dynamically.</p>";
+    }
+}
+
+let isFishing = false;
+let reelProgress = 0;
+let fishInterval;
+
+document.getElementById("cast-btn").addEventListener("click", () => {
+    const btn = document.getElementById("cast-btn");
+    const status = document.getElementById("game-status");
+    const barContainer = document.getElementById("fishing-bar-container");
+    const progress = document.getElementById("fish-progress");
+
+    if (!isFishing) {
+        isFishing = true;
+        btn.innerText = "WAIT FOR BITE...";
+        status.innerText = "Line casted... waiting for the float to bob...";
+
+        setTimeout(() => {
+            status.innerText = "🐟 BITE! REEL IT IN NOW! SPAM THE BUTTON!";
+            btn.innerText = "REEL!";
+            barContainer.style.display = "block";
+
+            fishInterval = setInterval(() => {
+                if (reelProgress > 0) {
+                    reelProgress -= 3;
+                    progress.style.width = reelProgress + "%";
+                }
+            }, 150);
+        }, 2000 + Math.random() * 2000);
+    } else if (btn.innerText === "REEL!") {
+        reelProgress += 12;
+        progress.style.width = reelProgress + "%";
+
+        if (reelProgress >= 100) {
+            clearInterval(fishInterval);
+            const lootTable = ["Massive Sea Bass", "Teeny Minnow", "Old Boot", "Daz's Missing Hat", "Will's Favorite Hat", "Richard the First"];
+            const caught = lootTable[Math.floor(Math.random() * lootTable.length)];
+
+            status.innerText = `🏆 SUCCESS! You reeled in a [ ${caught} ]!`;
+            resetGame();
+        }
+    }
+});
+
+function resetGame() {
+    const btn = document.getElementById("cast-btn");
+    const barContainer = document.getElementById("fishing-bar-container");
+    const progress = document.getElementById("fish-progress");
+
+    isFishing = false;
+    reelProgress = 0;
+    btn.innerText = "CAST LINE";
+    setTimeout(() => {
+        barContainer.style.display = "none";
+        progress.style.width = "0%";
+    }, 3000);
+}
+
+async function fetchRssFeed(url) {
+    const proxyUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+
+    try {
+        const response = await fetch(proxyUrl);
+        if (!response.ok) {
+            return { items: [] };
+        }
+
+        const data = await response.json();
+        return data && Array.isArray(data.items) ? data : { items: [] };
+    } catch (error) {
+        console.error(`RSS fetch failed for ${url}:`, error);
+        return { items: [] };
+    }
+}
+
+async function fetchSocialFeeds() {
+    const container = document.getElementById("social-container");
+
+    try {
+        const [twitterResponse, instagramResponse] = await Promise.all([
+            fetchRssFeed(CONFIG.RSS_FEEDS.twitter),
+            fetchRssFeed(CONFIG.RSS_FEEDS.instagram)
+        ]);
+
+        let combinedPosts = [];
+
+        if (twitterResponse.items && twitterResponse.items.length > 0) {
+            twitterResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Twitter / X",
+                    text: item.title || "New Tweet",
+                    link: item.link || "#",
+                    date: new Date(item.pubDate || Date.now()).getTime()
+                });
+            });
+        }
+
+        if (instagramResponse.items && instagramResponse.items.length > 0) {
+            instagramResponse.items.forEach(item => {
+                combinedPosts.push({
+                    platform: "Instagram",
+                    text: item.title || "New Instagram Post",
+                    link: item.link || "#",
+                    date: new Date(item.pubDate || Date.now()).getTime()
+                });
+            });
+        }
+
+        combinedPosts.sort((a, b) => b.date - a.date);
+
+        if (combinedPosts.length === 0) {
+            container.innerHTML = "<p>No recent social updates found.</p>";
+            return;
+        }
+
+        container.innerHTML = "";
+        const displayCard = document.createElement("div");
+        displayCard.className = "social-card-display";
+        container.appendChild(displayCard);
+
+        let currentIndex = 0;
+
+        function renderPost() {
+            const post = combinedPosts[currentIndex];
+            const isInstagram = post.platform === "Instagram";
+
+            displayCard.innerHTML = `
+                <div class="social-badge ${isInstagram ? 'instagram' : 'twitterx'}">
+                    ${isInstagram ? '📸' : '🐦'} ${post.platform}
                 </div>
-                <div class="stat-box">
-                    <span class="stat-label">Vibe</span>
-                    <strong>Hilarious</strong>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-label">Energy</span>
-                    <strong>Unfiltered</strong>
-                </div>
-            </div>
-        </section>
+                <p class="social-text">${post.text}</p>
+                <a href="${post.link}" target="_blank" rel="noopener noreferrer" class="social-view-btn">
+                    View Original Post →
+                </a>
+            `;
 
-        <section class="feature-row">
-            <article class="feature-card panel">
-                <span class="feature-icon">🎮</span>
-                <h4>Horror game chaos</h4>
-                <p>From tense playthroughs to full-on scream-at-the-screen moments, Daz lives for the jump scares.</p>
-            </article>
-            <article class="feature-card panel">
-                <span class="feature-icon">😂</span>
-                <h4>Daz Watches</h4>
-                <p>His reaction energy turns every video into a comedy event — genuine, loud, and unforgettable.</p>
-            </article>
-            <article class="feature-card panel">
-                <span class="feature-icon">🔥</span>
-                <h4>Comedy + personality</h4>
-                <p>Warm, expressive, and impossible to ignore, Daz blends gaming, satire, and pure personality.</p>
-            </article>
-        </section>
+            currentIndex = (currentIndex + 1) % combinedPosts.length;
+        }
 
-        <section class="about-panel panel">
-            <div class="about-header">
-                <p class="kicker">ABOUT DAZ</p>
-                <h3>Born to entertain, built for the internet.</h3>
-            </div>
-
-            <div class="about-layout">
-                <div class="about-copy">
-                    <p>
-                        Darren “Daz” Black is one of the most recognisable British internet personalities of the last decade.
-                        He’s a YouTuber, comedian, actor, filmmaker, and content creator with a huge fanbase that loves his
-                        honest reactions, no-filter humour, and unmistakable energy.
-                    </p>
-                    <p>
-                        The magic of Daz Games is his ability to make gaming feel personal. He is expressive, affectionate,
-                        chaotic, and impossible to classify as anything other than himself. Whether he is reacting to a horror
-                        game, poking fun at a viral moment, or just being wildly charismatic in front of the camera, he brings
-                        a vibe that feels both familiar and larger than life.
-                    </p>
-                    <p>
-                        He also has that rare quality of making viewers feel like they are in on the joke — like they’re laughing
-                        with a mate who just happens to be one of the funniest people on the internet.
-                    </p>
-                </div>
-
-                <div class="about-facts">
-                    <div class="fact-box">
-                        <span>Known for</span>
-                        <strong>Gaming, reactions, humour</strong>
-                    </div>
-                    <div class="fact-box">
-                        <span>Signature style</span>
-                        <strong>Chaotic, warm, expressive</strong>
-                    </div>
-                    <div class="fact-box">
-                        <span>Fan favourite</span>
-                        <strong>Horror games + comedy chaos</strong>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="easter-egg-panel panel">
-            <p class="kicker">EASTER EGGS</p>
-            <h3>Little Daz moments and fan lore</h3>
-            <div class="egg-grid">
-                <div class="egg-card">
-                    <span>🎩</span>
-                    <p>“ha.” is basically instant Daz energy — a tiny, iconic, unforgettable little moment.</p>
-                </div>
-                <div class="egg-card">
-                    <span>🕶️</span>
-                    <p>His comedy style feels like a studio audience and a sleepover vlog had a baby.</p>
-                </div>
-                <div class="egg-card">
-                    <span>🎮</span>
-                    <p>Any time a horror game starts creeping in, everyone knows the tension is about to go absolutely feral.</p>
-                </div>
-                <div class="egg-card">
-                    <span>😂</span>
-                    <p>The core of Daz’s charm is that he doesn’t just react — he fully commits to the moment.</p>
-                </div>
-            </div>
-        </section>
-
-        <section class="panel rewards-panel">
-            <p class="kicker">REWARDS</p>
-            <h3>Unlocked badges</h3>
-            <div id="badge-container" class="badge-container"></div>
-        </section>
-
-        <div class="dashboard-grid">
-            <section class="panel soundboard-panel">
-                <h3>⚡ MEME SOUNDBOARD</h3>
-                <div class="sound-grid">
-                    <button class="sound-btn" data-sound="linda.mp3">🗣️ LINDA!</button>
-                    <button class="sound-btn" data-sound="ha.mp3">🎩 ha. (Hat Raise)</button>
-                    <button class="sound-btn" data-sound="fanta.mp3">That's fucking Fanta!</button>
-                </div>
-            </section>
-
-            <section class="panel youtube-panel">
-                <h3>📺 LATEST VIDEOS</h3>
-                <div id="video-container" class="video-feed">
-                    <p class="loading">Fetching latest uploads from YouTube...</p>
-                </div>
-            </section>
-
-            <section class="panel social-panel">
-                <h3>📱 SOCIAL UPDATES</h3>
-                <div id="social-container" class="social-feed">
-                    <p class="loading">Connecting to social feeds...</p>
-                </div>
-            </section>
-
-            <section class="panel daz-panel">
-                <h3>🌟 WHY DAZ GAMES HIT</h3>
-                <ul class="daz-list">
-                    <li>Comedy that feels real, loud, and spontaneous.</li>
-                    <li>Horror gaming energy that keeps fans coming back.</li>
-                    <li>Big reactions and memorable catchphrases.</li>
-                    <li>Creative sketches and content with huge personality.</li>
-                    <li>Authentic internet charisma with a loyal fanbase.</li>
-                </ul>
-                <div class="quote-box">
-                    “The energy is the whole point — it feels like a laugh with your mates.”
-                </div>
-            </section>
-        </div>
-
-        <section class="panel game-panel">
-            <h3>🎣 FISH IN DAZ’S POND</h3>
-            <div id="game-box">
-                <p id="game-status">Ready to catch some fish?</p>
-                <div id="fishing-bar-container" style="display: none;">
-                    <div id="fish-progress"></div>
-                </div>
-                <button id="cast-btn">CAST LINE</button>
-            </div>
-        </section>
-
-        <section class="panel memory-panel">
-            <h3>🎯 DAZ MEMORY RUSH</h3>
-            <div id="memory-game" class="memory-game">
-                <button class="memory-card" data-key="1">?</button>
-                <button class="memory-card" data-key="2">?</button>
-                <button class="memory-card" data-key="3">?</button>
-                <button class="memory-card" data-key="4">?</button>
-                <button class="memory-card" data-key="5">?</button>
-                <button class="memory-card" data-key="6">?</button>
-            </div>
-            <p id="memory-status" class="memory-status">Match the Daz-themed pairs.</p>
-        </section>
-    </main>
-
-    <audio id="global-player"></audio>
-
-    <script src="app.js"></script>
-</body>
-</html>
+        renderPost();
+        setInterval(renderPost, 5000);
+    } catch (error) {
+        console.error("Social Engine Error:", error);
+        container.innerHTML = "<p style='color: red;'>Failed to load social updates.</p>";
+    }
+}
