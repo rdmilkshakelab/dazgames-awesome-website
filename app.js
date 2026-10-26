@@ -13,17 +13,38 @@ document.addEventListener("DOMContentLoaded", () => {
     fetchSocialFeeds();
 });
 
+async function resolveSoundPath(file) {
+    const candidates = [
+        `sounds/${file}`,
+        file
+    ];
+
+    for (const candidate of candidates) {
+        try {
+            const response = await fetch(candidate, { method: "HEAD" });
+            if (response.ok) {
+                return candidate;
+            }
+        } catch (error) {
+            // ignore and try next candidate
+        }
+    }
+
+    return candidates[0];
+}
+
 // soundboard trigger engine
 function initSoundboard() {
     const buttons = document.querySelectorAll(".sound-btn");
     const player = document.getElementById("global-player");
 
     buttons.forEach(btn => {
-        btn.addEventListener("click", () => {
+        btn.addEventListener("click", async () => {
             const file = btn.getAttribute("data-sound");
             if (!file) return;
 
-            player.src = `sounds/${file}`;
+            const soundPath = await resolveSoundPath(file);
+            player.src = soundPath;
             player.load();
             player.currentTime = 0;
             player.play().catch(error => {
